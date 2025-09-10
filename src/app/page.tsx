@@ -15,7 +15,10 @@ export default function Home() {
     deleteHabit,
     toggleHabitCompletion,
     isCompletedToday,
-    calculateStreak
+    calculateStreak,
+    getWeeklyProgress,
+    getMonthlyProgress,
+    exportHabitsData
   } = useHabits()
 
   const [isAddingHabit, setIsAddingHabit] = useState(false)
@@ -23,8 +26,8 @@ export default function Home() {
   const [habitToDelete, setHabitToDelete] = useState<string | null>(null)
   const [habitNameToDelete, setHabitNameToDelete] = useState('')
 
-  const handleAddHabit = (habitName: string) => {
-    addHabit(habitName)
+  const handleAddHabit = (habitName: string, category: 'Health' | 'Work' | 'Personal', difficulty: 'Easy' | 'Medium' | 'Hard') => {
+    addHabit(habitName, category, difficulty)
     setIsAddingHabit(false)
   }
 
@@ -77,15 +80,47 @@ export default function Home() {
         <div>
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold">Your Habits</h2>
-            {!isAddingHabit && (
-              <button
-                onClick={() => setIsAddingHabit(true)}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-              >
-                Add New Habit
-              </button>
-            )}
+            <div className="flex gap-3">
+              {habits.length > 0 && (
+                <button
+                  onClick={exportHabitsData}
+                  className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 flex items-center gap-2"
+                >
+                  📤 Export Data
+                </button>
+              )}
+              {!isAddingHabit && (
+                <button
+                  onClick={() => setIsAddingHabit(true)}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  Add New Habit
+                </button>
+              )}
+            </div>
           </div>
+
+          {/* Statistics Summary */}
+          {habits.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                <h3 className="font-semibold text-blue-800 mb-1">Total Habits</h3>
+                <p className="text-2xl font-bold text-blue-600">{habits.length}</p>
+              </div>
+              <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+                <h3 className="font-semibold text-green-800 mb-1">Completed Today</h3>
+                <p className="text-2xl font-bold text-green-600">
+                  {habits.filter(habit => isCompletedToday(habit)).length}
+                </p>
+              </div>
+              <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+                <h3 className="font-semibold text-orange-800 mb-1">Active Streaks</h3>
+                <p className="text-2xl font-bold text-orange-600">
+                  {habits.filter(habit => calculateStreak(habit) > 0).length}
+                </p>
+              </div>
+            </div>
+          )}
 
           {isAddingHabit && (
             <HabitForm
