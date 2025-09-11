@@ -6,6 +6,7 @@ import { useHabits } from './hooks/useHabits'
 import HabitForm from './components/HabitForm'
 import HabitCard from './components/HabitCard'
 import DeleteConfirmModal from './components/DeleteConfirmModal'
+import HabitAnalytics from './components/HabitAnalytics'
 
 export default function Home() {
   const {
@@ -100,26 +101,15 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Statistics Summary */}
+          {/* Enhanced Analytics */}
           {habits.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
-                <h3 className="font-semibold text-blue-800 mb-1">Total Habits</h3>
-                <p className="text-2xl font-bold text-blue-600">{habits.length}</p>
-              </div>
-              <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
-                <h3 className="font-semibold text-green-800 mb-1">Completed Today</h3>
-                <p className="text-2xl font-bold text-green-600">
-                  {habits.filter(habit => isCompletedToday(habit)).length}
-                </p>
-              </div>
-              <div className="bg-orange-50 border border-orange-200 p-4 rounded-lg">
-                <h3 className="font-semibold text-orange-800 mb-1">Active Streaks</h3>
-                <p className="text-2xl font-bold text-orange-600">
-                  {habits.filter(habit => calculateStreak(habit) > 0).length}
-                </p>
-              </div>
-            </div>
+            <HabitAnalytics
+              habits={habits}
+              isCompletedToday={isCompletedToday}
+              calculateStreak={calculateStreak}
+              getWeeklyProgress={getWeeklyProgress}
+              getMonthlyProgress={getMonthlyProgress}
+            />
           )}
 
           {isAddingHabit && (
