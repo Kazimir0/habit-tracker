@@ -5,6 +5,7 @@ import {
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import Navbar from './components/Navbar'
+import { ThemeProvider } from '../contexts/ThemeContext'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,14 +29,18 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <Navbar />
-          <main className="min-h-screen bg-gray-50 pt-8 pb-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto">
-              {children}
+      <html lang="en" suppressHydrationWarning>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
+          <ThemeProvider defaultTheme="system">
+            <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+              <Navbar />
+              <main className="bg-gray-50 dark:bg-gray-800 pt-8 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+                <div className="max-w-7xl mx-auto">
+                  {children}
+                </div>
+              </main>
             </div>
-          </main>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

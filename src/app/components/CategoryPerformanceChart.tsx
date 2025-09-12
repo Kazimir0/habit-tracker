@@ -65,11 +65,6 @@ export default function CategoryPerformanceChart({ habits }: CategoryPerformance
 
     return (
         <div className="space-y-4">
-            {/* Debug: Show the data (optional - you can remove this later) */}
-            <div className="text-sm text-gray-600">
-                <pre>{JSON.stringify(chartData, null, 2)}</pre>
-            </div>
-
             {/* Bar Chart */}
             <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
