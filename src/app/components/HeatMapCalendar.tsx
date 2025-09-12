@@ -1,7 +1,8 @@
 'use client'
 
 import { Habit } from '../types/habit'
-
+import { useState } from 'react'
+import HeatMapTooltip from './HeatMapTooltip'
 interface HeatMapCalendarProps {
     habits: Habit[]
 }
@@ -39,6 +40,14 @@ export default function HeatMapCalendar({ habits }: HeatMapCalendarProps) {
     }
 
     const calendarData = generateCalendarData()
+    // hoveredDay stores info about the currently hovered day | null when no hover -> no tooltip present
+    const [hoveredDay, setHoveredDay] = useState<{
+        date: string
+        completions: number
+        displayDate: Date
+        x: number
+        y: number
+    } | null>(null)
 
     // Get color intensity based on completions
     const getIntensityColor = (completions: number) => {
@@ -67,14 +76,44 @@ export default function HeatMapCalendar({ habits }: HeatMapCalendarProps) {
             </div>
 
             {/* Calendar Grid */}
-            <div className="grid grid-cols-12 gap-1 text-xs">
+            <div className="grid grid-cols-12 gap-1 text-xs relative">
                 {calendarData.map((day) => (
                     <div
                         key={day.date}
-                        className={`w-3 h-3 rounded-sm ${getIntensityColor(day.completions)} hover:ring-2 hover:ring-gray-400 cursor-pointer transition-all duration-200`}
-                        title={`${day.displayDate.toLocaleDateString()}: ${day.completions} habits completed`}
+                        className={`w-3 h-3 rounded-sm ${getIntensityColor(day.completions)}
+                hover:ring-2 hover:ring-gray-400 cursor-pointer transition-all duration-200`}
+                    // onMouseEnter react event when moouse enter the square
+                    onMouseEnter={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect() // get the exact position of the square on screen
+                            setHoveredDay({
+                                date: day.date,
+                                completions: day.completions,
+                                displayDate: day.displayDate,
+                                x: rect.left + rect.width / 2, // Center horizontally
+                                y: rect.top - 10 // Position above square
+                            })
+                        }}
+                        onMouseLeave={() => setHoveredDay(null)}
                     />
                 ))}
+
+                {/* Custom Tooltip */}
+                {hoveredDay && (
+                    <div
+                        className="fixed z-50 pointer-events-none"
+                        style={{
+                            left: hoveredDay.x - 150, // Center the tooltip
+                            top: hoveredDay.y - 120,  // Position above the square
+                        }}
+                    >
+                        <HeatMapTooltip
+                            date={hoveredDay.date}
+                            completions={hoveredDay.completions}
+                            habits={habits}
+                            displayDate={hoveredDay.displayDate}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Month labels */}

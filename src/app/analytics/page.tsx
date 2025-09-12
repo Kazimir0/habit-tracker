@@ -2,6 +2,7 @@
 
 import { useHabits } from '../hooks/useHabits'
 import HeatMapCalendar from '../components/HeatMapCalendar'
+import CategoryPerformanceChart from '../components/CategoryPerformanceChart'
 
 export default function AnalyticsPage() {
     const { habits } = useHabits()
@@ -22,10 +23,10 @@ export default function AnalyticsPage() {
                     <HeatMapCalendar habits={habits} />
                 </div>
 
-                {/* Category Performance - Coming next */}
+                {/* Category Performance */}
                 <div className="bg-white p-6 rounded-lg shadow-sm border">
                     <h2 className="text-xl font-semibold mb-4">Category Performance</h2>
-                    <p className="text-gray-500">Category charts coming soon...</p>
+                    <CategoryPerformanceChart habits={habits} />
                 </div>
             </div>
 
