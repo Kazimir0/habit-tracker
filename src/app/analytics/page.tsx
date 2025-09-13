@@ -7,6 +7,7 @@ import CategoryPerformanceChart from '../components/CategoryPerformanceChart'
 export default function AnalyticsPage() {
     const { habits } = useHabits()
 
+    // Page Layout
     return (
         <div className="space-y-8">
             {/* Page Header */}
