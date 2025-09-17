@@ -12,7 +12,7 @@ interface HeatMapTooltipProps {
 export default function HeatMapTooltip({ date, completions, habits, displayDate }: HeatMapTooltipProps) {
     // Find which specific habits were completed on this date
     const completedHabitsOnDate = habits.filter(habit =>
-        habit.completions?.some(completion => completion.startsWith(date))
+        habit.completions?.some(completion => completion.date === date)
     )
 
     // Get motivational message based on completion count

@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  habits Habit[]
+
+  @@map("users")
+}
+
+model Habit {
+  id         String          @id @default(cuid())
+  name       String
+  category   HabitCategory   @default(PERSONAL)
+  difficulty HabitDifficulty @default(MEDIUM)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  userId     String
+  user       User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  completions HabitCompletion[]
+
+  @@map("habits")
+}
+
+model HabitCompletion {
+  id          String   @id @default(cuid())
+  completedAt DateTime @default(now())
+  date        String   // Store as YYYY-MM-DD format for easy querying
+  
+  habitId String
+  habit   Habit  @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date]) // Prevent duplicate completions on same date
+  @@map("habit_completions")
+}
+
+enum HabitCategory {
+  HEALTH
+  WORK
+  PERSONAL
+}
+
+enum HabitDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}

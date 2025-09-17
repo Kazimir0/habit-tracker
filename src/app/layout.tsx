@@ -6,6 +6,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import Navbar from './components/Navbar'
 import { ThemeProvider } from '../contexts/ThemeContext'
+import { NotificationProvider } from '../contexts/NotificationContext'
+import ToastContainer from '../components/ToastContainer'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -32,14 +34,17 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
           <ThemeProvider defaultTheme="system">
-            <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
-              <Navbar />
-              <main className="bg-gray-50 dark:bg-gray-800 pt-8 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
-                <div className="max-w-7xl mx-auto">
-                  {children}
-                </div>
-              </main>
-            </div>
+            <NotificationProvider>
+              <div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+                <Navbar />
+                <main className="bg-gray-50 dark:bg-gray-800 pt-8 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+                  <div className="max-w-7xl mx-auto">
+                    {children}
+                  </div>
+                </main>
+                <ToastContainer />
+              </div>
+            </NotificationProvider>
           </ThemeProvider>
         </body>
       </html>

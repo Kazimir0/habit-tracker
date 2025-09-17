@@ -35,7 +35,7 @@ export default function CategoryPerformanceChart({ habits }: CategoryPerformance
             // Count actual completions in the last 30 days
             const actualCompletions = categoryHabits.reduce((total, habit) => { // Loop through each habit in the category
                 const recentCompletions = habit.completions?.filter(completion => {
-                    const completionDate = new Date(completion)
+                    const completionDate = new Date(completion.date)
                     const thirtyDaysAgo = new Date()
                     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - daysToCheck)
                     return completionDate >= thirtyDaysAgo

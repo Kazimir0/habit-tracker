@@ -23,7 +23,7 @@ export default function HeatMapCalendar({ habits }: HeatMapCalendarProps) {
             // Count completions for this date across all habits
             const completionsCount = habits.reduce((count, habit) => {
                 return count + (habit.completions?.filter(completion =>
-                    completion.startsWith(dateString)
+                    completion.date === dateString
                 ).length || 0)
             }, 0)
 
