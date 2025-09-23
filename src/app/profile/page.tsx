@@ -25,6 +25,9 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
+  const [verificationState, setVerificationState] = useState<'idle' | 'sending' | 'code-sent' | 'verifying' | 'verified'>('idle')
+  const [verificationCode, setVerificationCode] = useState('')
+
   // Load profile data
   useEffect(() => {
     const fetchProfile = async () => {
@@ -129,6 +132,78 @@ export default function ProfilePage() {
     }
   }
 
+  // Send SMS verification code
+  const sendVerificationCode = async () => {
+    if (!profile.phoneNumber) {
+      showError('Please enter a phone number first.')
+      return
+    }
+
+    setVerificationState('sending')
+    try {
+      const response = await fetch('/api/verify-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phoneNumber: profile.phoneNumber,
+          action: 'send'
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setVerificationState('code-sent')
+        showSuccess('📱 Verification code sent! Check your terminal for the code.')
+      } else {
+        setVerificationState('idle')
+        showError(data.error || 'Failed to send verification code.')
+      }
+    } catch (error) {
+      console.error('Send verification error:', error)
+      setVerificationState('idle')
+      showError('Failed to send verification code. Please try again.')
+    }
+  }
+
+  // Verify SMS code
+  const verifyCode = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      showError('Please enter a valid 6-digit code.')
+      return
+    }
+
+    setVerificationState('verifying')
+    try {
+      const response = await fetch('/api/verify-phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: verificationCode,
+          action: 'verify'
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setVerificationState('verified')
+        setProfile({ ...profile, phoneVerified: true })
+        setVerificationCode('')
+        showSuccess('🎉 Phone number verified successfully!')
+      } else {
+        setVerificationState('code-sent') // Go back to code input state on error
+        showError(data.error || 'Invalid verification code.')
+      }
+    } catch (error) {
+      console.error('Verify code error:', error)
+      setVerificationState('code-sent') // Go back to code input state on error
+      showError('Failed to verify code. Please try again.')
+    }
+    // Remove the finally block that was causing the issue
+  }
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -195,17 +270,63 @@ export default function ProfilePage() {
 
             <div>
               <label className="block text-sm font-medium mb-2">Phone Number</label>
-              <div className="flex">
-                <input
-                  type="tel"
-                  value={profile.phoneNumber || ''}
-                  onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
-                  placeholder="+40 123 456 789"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-                <button className="px-4 py-2 bg-green-500 text-white rounded-r-lg hover:bg-green-600 transition-colors">
-                  {profile.phoneVerified ? '✅' : 'Verify'}
-                </button>
+              <div className="space-y-2">
+                <div className="flex">
+                  <input
+                    type="tel"
+                    value={profile.phoneNumber || ''}
+                    onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
+                    placeholder="+40 123 456 789"
+                    disabled={profile.phoneVerified}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:opacity-50"
+                  />
+
+                  {/* Different button states */}
+                  {profile.phoneVerified ? (
+                    <button disabled className="px-4 py-2 bg-green-500 text-white rounded-r-lg">
+                      ✅ Verified
+                    </button>
+                  ) : verificationState === 'idle' ? (
+                    <button
+                      onClick={sendVerificationCode}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Send Code
+                    </button>
+                  ) : verificationState === 'sending' ? (
+                    <button disabled className="px-4 py-2 bg-blue-500 text-white rounded-r-lg opacity-50">
+                      Sending...
+                    </button>
+                  ) : (
+                    <button
+                      onClick={sendVerificationCode}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600 transition-colors"
+                    >
+                      Resend
+                    </button>
+                  )}
+                </div>
+
+                {/* Code input field (only show when code was sent) */}
+                {(verificationState === 'code-sent' || verificationState === 'verifying') && (
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="Enter 6-digit code"
+                      maxLength={6}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center text-lg font-mono"
+                    />
+                    <button
+                      onClick={verifyCode}
+                      disabled={verificationCode.length !== 6 || verificationState === 'verifying'}
+                      className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {verificationState === 'verifying' ? 'Verifying...' : 'Verify'}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
