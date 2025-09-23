@@ -20,6 +20,7 @@ export default function Navbar() {
     const navigation = [
         { name: 'Home', href: '/' },
         { name: 'Analytics', href: '/analytics' },
+        { name: 'Profile', href: '/profile' },
     ]
 
     const handleSignOut = () => {

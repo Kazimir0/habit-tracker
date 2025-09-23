@@ -22,7 +22,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  habits Habit[]
+  habits  Habit[]
+  profile UserProfile?
 
   @@map("users")
 }
@@ -65,4 +66,40 @@ enum HabitDifficulty {
   EASY
   MEDIUM
   HARD
+}
+
+model UserProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  nickname      String?
+  avatar        String?  // URL to avatar image
+  bio           String?
+  phoneNumber   String?
+  phoneVerified Boolean  @default(false)
+  timezone      String   @default("Europe/Bucharest") // Romanian timezone
+  theme         String   @default("light") // light | dark
+  language      String   @default("en") // en | ro
+  
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+model VerificationCode {
+  id          String   @id @default(cuid())
+  userId      String
+  code        String   // 6-digit SMS code
+  type        String   // "phone" | "email"
+  phoneNumber String?  // Store the phone number being verified
+  expiresAt   DateTime
+  verified    Boolean  @default(false)
+  attempts    Int      @default(0) // Track verification attempts
+  
+  createdAt   DateTime @default(now())
+
+  @@map("verification_codes")
 }
